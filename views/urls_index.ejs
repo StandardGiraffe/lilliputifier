@@ -5,8 +5,20 @@
 </head>
 <body>
   <h1>Currently Available Shortened URLs:</h1>
-  <ul>
-    <%=  %>
+
+  <div class="new URLs">
+    <h2>Lilliputagain!</h2>
+    <p><a href="#">Click here to create a new shortened URL.</a></p>
+  </div>
+
+  <div class="master list">
+    <h2>Lilliputesyoudid:</h2>
+    <ul>
+      <% for (lilliputs in urls) { %>
+        <li> <%= Object.values(lilliputs); %> </li>
+      <% }; %>
+    </ul>
+  </div>
   </ul>
 </body>
 </html>
