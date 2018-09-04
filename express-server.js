@@ -6,17 +6,6 @@ const PORT = 8080;
 // Initializing viewing engine: ejs
 app.set("view engine", "ejs");
 
-// This function was copied from the solution here: https://stackoverflow.com/questions/9907419/how-to-get-a-key-in-a-javascript-object-by-its-value
-Object.prototype.getKey = function (value) {
-  for (let key in this) {
-    if (this[key] == value) {
-      return key;
-    }
-  }
-  return null;
-}
-
-
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -45,7 +34,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     "shortURL": req.params.id,
-    "fullURL": Object.getKey(urlDatabase[req.params.id])
+    "fullURL": urlDatabase[req.params.id]
   };
 
   res.render("urls_show", templateVars);
