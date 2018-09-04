@@ -6,6 +6,16 @@ const PORT = 8080;
 // Initializing viewing engine: ejs
 app.set("view engine", "ejs");
 
+// This function was copied from the solution here: https://stackoverflow.com/questions/9907419/how-to-get-a-key-in-a-javascript-object-by-its-value
+Object.prototype.getKey = function (value) {
+  for (let key in this) {
+    if (this[key] == value) {
+      return key;
+    }
+  }
+  return null;
+}
+
 
 
 const urlDatabase = {
@@ -30,7 +40,16 @@ app.get("/urls", (req, res) => {
   // I believe what we're doing here is instantiating an object to contain the url database, and then passing that as a variable into urls_index, where it can be called (and iterated through).
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
-})
+});
+
+app.get("/urls/:id", (req, res) => {
+  let templateVars = {
+    "shortURL": req.params.id,
+    "fullURL": Object.getKey(urlDatabase[req.params.id])
+  };
+
+  res.render("urls_show", templateVars);
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`)
