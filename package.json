@@ -1,0 +1,15 @@
+{
+  "name": "teeny-weeny-url",
+  "version": "1.0.0",
+  "description": "A URL shortener.  Because shorter is better.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Danny Fekete",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "^4.16.3"
+  }
+}

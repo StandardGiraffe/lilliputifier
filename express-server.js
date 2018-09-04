@@ -1,0 +1,37 @@
+// Declaring serverwide constants
+const express = require("express");
+const app = express();
+const PORT = 8080;
+
+// Initializing viewing engine: ejs
+app.set("view engine", "ejs");
+
+
+
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+
+app.get("/", (req, res) => {
+  res.send("Hello!");
+});
+
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n")
+});
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+app.get("/urls", (req, res) => {
+
+  // I believe what we're doing here is instantiating an object to contain the url database, and then passing that as a variable into urls_index, where it can be called (and iterated through).
+  let templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+})
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`)
+});
