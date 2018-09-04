@@ -1,10 +1,14 @@
 // Declaring serverwide constants
 const express = require("express");
 const app = express();
+const bodyParser = require("body-parser");
 const PORT = 8080;
 
 // Initializing viewing engine: ejs
 app.set("view engine", "ejs");
+
+// Passes all incoming signals through the parser.
+app.use(bodyParser.urlencoded({extended: true}));
 
 
 const urlDatabase = {
@@ -29,6 +33,11 @@ app.get("/urls", (req, res) => {
   // I believe what we're doing here is instantiating an object to contain the url database, and then passing that as a variable into urls_index, where it can be called (and iterated through).
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 app.get("/urls/:id", (req, res) => {
