@@ -1,16 +1,20 @@
 {
-  "name": "teeny-weeny-url",
+  "name": "lilliputifier",
   "version": "1.0.0",
   "description": "A URL shortener.  Because shorter is better.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "main": "express_server.js",
+"scripts": {
+  "start": "./node_modules/.bin/nodemon -L express-server.js",
+  "test": "echo \"Error: no test specified\" && exit 1"
+},
   "author": "Danny Fekete",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
     "ejs": "^2.6.1",
     "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.4"
   }
 }
