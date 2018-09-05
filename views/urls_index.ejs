@@ -20,7 +20,7 @@
       <h2>Lilliputesyoudid:</h2>
       <ul>
         <% for (lilliputs in urls) { %>
-          <li><%= urls[lilliputs] %> 👉 www.lilli.put/<strong><%= lilliputs; %>  </strong><button type="button"><form method="POST" action="/urls/9sm5xK/delete">Delete</form></button></li>
+          <li><%= urls[lilliputs] %> 👉 www.lilli.put/<strong><%= lilliputs %>  </strong><form method="POST" action="/urls/<%= lilliputs %>/delete"><button type="submit">Delete</button></form></li>
         <% }; %>
       </ul>
     </div>

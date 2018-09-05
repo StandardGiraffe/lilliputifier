@@ -54,6 +54,13 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+// Deletes a record.
+app.post("/urls/:id/delete", (req, res) => {
+  console.log("Deleted the record for " + urlDatabase[req.params.id]);
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+})
+
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     "shortURL": req.params.id,
