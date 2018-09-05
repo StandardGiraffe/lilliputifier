@@ -56,6 +56,11 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+// Receives a login request and username
+app.post("/login", (req, res) => {
+  console.log(`Login request received from ${req.body.username}.  Did it work?`)
+})
+
 // Deletes a record.
 app.post("/urls/:id/delete", (req, res) => {
   console.log("Deleted the record for " + urlDatabase[req.params.id]);
