@@ -1,7 +1,9 @@
-// Declaring serverwide constants
+// Require dependencies
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const cookieParser=require("cookie-parser");
+
 const PORT = 8080;
 
 // Initializing viewing engine: ejs
