@@ -7,7 +7,11 @@
   <header>
     <%- include("partials/_header"); %>
   </header>
+  <h1>Lilliput: <strong><%= shortURL %></strong></h1>
 
-  <p><%= fullURL %>  👉  www.lilli.put/<strong><%= shortURL; %></strong></p>
+  <form method="POST" action="/urls/<%= shortURL %> name="updateURL">
+    <input type="text" value="<%= fullURL %>">
+      <button type="submit">Update</button></form>
+  <!-- <p><%= fullURL %>  👉  www.lilli.put/<strong><%= shortURL %></strong></p> -->
 </body>
 </html>
