@@ -65,8 +65,8 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDatabase[req.params.id] + " to " + req.body.fullURL);
   urlDatabase[req.params.id] = req.body.fullURL;
-  console.log(`www.lilli.put/${req.params.id} now points to ${urlDatabase[req.params.id]}`);
-  console.log("body-parser sent: " + JSON.stringify(req.body));
+  console.log(`DONE: www.lilli.put/${req.params.id} now points to ${urlDatabase[req.params.id]}\n`);
+  res.redirect("/urls");
 })
 
 app.get("/urls/:id", (req, res) => {
