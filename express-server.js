@@ -4,6 +4,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const cookieParser=require("cookie-parser");
 
+
 const PORT = 8080;
 
 // Initializing viewing engine: ejs
@@ -11,6 +12,7 @@ app.set("view engine", "ejs");
 
 // Passes all incoming signals through the parser.
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 
 const urlDatabase = {
@@ -33,13 +35,17 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
 
   // I believe what we're doing here is instantiating an object to contain the url database, and then passing that as a variable into urls_index, where it can be called (and iterated through).
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars);
 });
 
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -58,7 +64,9 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Receives a login request and username
 app.post("/login", (req, res) => {
-  console.log(`Login request received from ${req.body.username}.  Did it work?`)
+  console.log(`Login request received from ${req.body.username}.  Did it work?`);
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
 })
 
 // Deletes a record.
@@ -79,7 +87,8 @@ app.post("/urls/:id", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     "shortURL": req.params.id,
-    "fullURL": urlDatabase[req.params.id]
+    "fullURL": urlDatabase[req.params.id],
+    "username": req.cookies["username"]
   };
 
   res.render("urls_show", templateVars);

@@ -7,4 +7,9 @@
     <button type="submit">Login</button>
   </form>
 </div>
+<div class="hello user">
+  <% if (username) { %>
+    <p>Welcome back, <%=username%>!</p>
+  <% } %>
+</div>
 <hr>
