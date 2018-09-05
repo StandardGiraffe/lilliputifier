@@ -48,6 +48,12 @@ app.post("/urls", (req, res) => {
   // res.send(urlDatabase); // Respond with "Ok" (we will replace this)
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  let shortURL = req.params.shortURL;
+  let longURL = urlDatabase[shortURL];
+  res.redirect(longURL);
+});
+
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     "shortURL": req.params.id,
