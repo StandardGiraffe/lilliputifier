@@ -9,8 +9,8 @@
   </header>
   <h1>Lilliput: <strong><%= shortURL %></strong></h1>
 
-  <form method="POST" action="/urls/<%= shortURL %> name="updateURL">
-    <input type="text" value="<%= fullURL %>">
+  <form method="POST" action="/urls/<%= shortURL %>">
+    <input type="text" value="<%= fullURL %>" name="fullURL">
       <button type="submit">Update</button></form>
   <!-- <p><%= fullURL %>  👉  www.lilli.put/<strong><%= shortURL %></strong></p> -->
 </body>

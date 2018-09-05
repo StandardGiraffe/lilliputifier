@@ -61,6 +61,14 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 })
 
+// Updates Lilliput pointers
+app.post("/urls/:id", (req, res) => {
+  console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDatabase[req.params.id] + " to " + req.body.fullURL);
+  urlDatabase[req.params.id] = req.body.fullURL;
+  console.log(`www.lilli.put/${req.params.id} now points to ${urlDatabase[req.params.id]}`);
+  console.log("body-parser sent: " + JSON.stringify(req.body));
+})
+
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     "shortURL": req.params.id,
