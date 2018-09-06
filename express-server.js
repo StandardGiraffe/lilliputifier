@@ -130,7 +130,6 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
 
-  // I believe what we're doing here is instantiating an object to contain the url database, and then passing that as a variable into urls_index, where it can be called (and iterated through).
   let templateVars = {
     urls: urlDatabase,
     username: req.cookies["user_id"],
@@ -159,6 +158,10 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+// Login page
+app.get("/login", (req, res) => {
+  res.render("urls_login");
+});
 
 
 // USER REGISTRATION:
@@ -203,7 +206,7 @@ app.post("/register", (req, res) => {
 // Receives a login request and username
 app.post("/login", (req, res) => {
   console.log(`Login request received from ${req.body.username}.`);
-  res.cookie("username", req.body.username);
+  res.cookie("user_id", req.body.username);
   res.redirect("/urls");
 });
 
