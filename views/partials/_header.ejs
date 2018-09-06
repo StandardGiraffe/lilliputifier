@@ -2,10 +2,12 @@
 <p>Tying down the largest addresses since 1726.</p>
 <br>
 <div class="login field">
+  <% if (!username) { %>
   <form method="post" action="/login">
     <input type="text" value="username" name="username">
     <button type="submit">Login</button>
   </form>
+  <% } %>
 </div>
 <div class="hello user">
   <% if (username) { %>
