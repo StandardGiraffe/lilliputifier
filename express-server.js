@@ -66,7 +66,6 @@ const createNewUser = function (email, password) {
 
   // Adds the new accout object to the database so that the key name matches the random ID
   usersDB[id] = newRecord;
-
   return newRecord;
 };
 
@@ -190,7 +189,9 @@ app.post("/register", (req, res) => {
     createNewUser(userEmail, userPassword);
 
     // console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`); // Prove the record was added.
+    console.log(findUserByEmail(userEmail).id);
 
+    res.cookie("username", findUserByEmail(userEmail).id);
     res.redirect("/urls")
 
   }
