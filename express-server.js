@@ -113,6 +113,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 
+
 // USER REGISTRATION:
 // Registration page:
 app.get("/register", (req, res) => {
@@ -121,18 +122,32 @@ app.get("/register", (req, res) => {
 
 // Register based on input:
 app.post("/register", (req, res) => {
-  userEmail = req.body.email;
-  userPassword = req.body.password;
 
-  // console.log (userEmail, userPassword);
-  generatedID = generateRandomString(6);
-  const newUser = createNewUser(generatedID, userEmail, userPassword);
+  // Handle registration errors:
+  if (req.body.password !== req.body.confirmPassword || !req.body.password || !req.body.email) {
+    res.send("Problem with supplied credentials.  Check email and ensure passwords match.");
+    res.status(400);
 
-  usersDB[generatedID] = newUser;
+  } else {
+    // Otherwise, it works!
 
-  console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`);
+    // Get the user-input from the forms and name them.
+    userEmail = req.body.email;
+    userPassword = req.body.password;
+    generatedID = generateRandomString(6);
 
-  res.redirect("/urls")
+    // Build the new account object
+    const newUser = createNewUser(generatedID, userEmail, userPassword);
+
+    // Adds the new accout object to the database so that the key name matches the random ID
+    usersDB[generatedID] = newUser;
+
+    console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`); // Prove the record was added.
+
+    res.redirect("/urls")
+
+  }
+
 });
 
 
