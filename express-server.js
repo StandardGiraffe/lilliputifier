@@ -56,12 +56,16 @@ const usersDB = {
 // ######
 
 // Generates a new user account object with supplied credentials.
-const createNewUser = function (id, email, password) {
+const createNewUser = function (email, password) {
+  const id = generateRandomString(6);
   const newRecord = {
     "id": id,
     "email": email,
     "password": password
   };
+
+  // Adds the new accout object to the database so that the key name matches the random ID
+  usersDB[id] = newRecord;
 
   return newRecord;
 };
@@ -77,18 +81,27 @@ const generateRandomString = function (length) {
   return text;
 };
 
-// Search user records for a specified value.
 const findUserByEmail = function (email) {
-  for (let user_id in usersDB) {
-    const user = usersDB[user_id]
+  for (let record in usersDB) {
+    const user = usersDB[record]
     if (user.email === email) {
-      return user;
+      return user; // returns that whole record
     }
   }
   return null;
 }
 
-/*
+const findUsernameById = function (userID) {
+  for (let record in usersDB) {
+    const user = usersDB[record]
+    if (user.id === id) {
+      return user.email;
+    }
+  }
+  return null;
+}
+
+
 // Built by Robert...
 const authenticateUser = (email, password) => {
   const user = findUserByEmail(email)
@@ -99,7 +112,7 @@ const authenticateUser = (email, password) => {
   }
   //return user && user.password === password ? user : null
 }
-*/
+
 
 // ######
 // Routing:
@@ -164,6 +177,7 @@ app.post("/register", (req, res) => {
 
   } else if (findUserByEmail(req.body.email)) {
     res.send("This email already exists in our database.  Please use a different one.");
+    res.status(400);  // supplied email matches another email in the database
 
   } else {
     // Otherwise, it works!
@@ -171,13 +185,9 @@ app.post("/register", (req, res) => {
     // Get the user-input from the forms and name them.
     userEmail = req.body.email;
     userPassword = req.body.password;
-    generatedID = generateRandomString(6);
 
     // Build the new account object
-    const newUser = createNewUser(generatedID, userEmail, userPassword);
-
-    // Adds the new accout object to the database so that the key name matches the random ID
-    usersDB[generatedID] = newUser;
+    createNewUser(userEmail, userPassword);
 
     // console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`); // Prove the record was added.
 
