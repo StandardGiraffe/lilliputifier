@@ -82,7 +82,7 @@ const generateRandomString = function (length) {
 
 const findUserByEmail = function (email) {
   for (let record in usersDB) {
-    const user = usersDB[record]
+    const user = usersDB[record];
     if (user.email === email) {
       return user; // returns that whole record
     }
@@ -90,16 +90,15 @@ const findUserByEmail = function (email) {
   return null;
 }
 
-const findUsernameById = function (userID) {
+const findUserByID = function (id) {
   for (let record in usersDB) {
-    const user = usersDB[record]
+    const user = usersDB[record];
     if (user.id === id) {
-      return user.email;
+      return user;
     }
   }
   return null;
 }
-
 
 // Built by Robert...
 const authenticateUser = (email, password) => {
@@ -140,8 +139,16 @@ app.get("/urls", (req, res) => {
 
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["user_id"] };
-  res.render("urls_new", templateVars);
+
+  if (!findUserByID(req.cookies["user_id"])) {
+    res.redirect("/login");
+  } else {
+
+    let templateVars = { username: req.cookies["user_id"] };
+    res.render("urls_new", templateVars);
+
+  }
+
 });
 
 app.post("/urls", (req, res) => {
