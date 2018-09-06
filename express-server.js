@@ -1,25 +1,75 @@
-// Require dependencies
+// ######
+// Require dependencies:
+// ######
+
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser=require("cookie-parser");
 
 
+
+// ######
+// Global constants:
+// ######
 const PORT = 8080;
 
-// Initializing viewing engine: ejs
-app.set("view engine", "ejs");
 
-// Passes all incoming signals through the parser.
+
+// ######
+// Middleware Initialization:
+// ######
+app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 
+
+// ######
+// Databases
+// ######
+
+// Shortened URLs:
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+// Users:
+const usersDB = {
+  "user1example": {
+    id: "randomIDHere",
+    email: "user@example.com",
+    password: "examplePasswordetc"
+  },
+
+  "user2example": {
+    id: "raldkjf;lsa",
+    email: "hello@frog.com",
+    password: "sdlsajfd;ldsjf"
+  }
+};
+
+
+// ######
+// Functions:
+// ######
+
+const createNewUser = function (id, email, password) {
+  const newRecord = {
+    "id": id,
+    "email": email,
+    "password": password
+  };
+
+  return newRecord;
+};
+
+
+
+// ######
+// Routing:
+// ######
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -62,6 +112,31 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+
+// USER REGISTRATION:
+// Registration page:
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
+// Register based on input:
+app.post("/register", (req, res) => {
+  userEmail = req.body.email;
+  userPassword = req.body.password;
+
+  // console.log (userEmail, userPassword);
+  generatedID = generateRandomString(6);
+  const newUser = createNewUser(generatedID, userEmail, userPassword);
+
+  usersDB[generatedID] = newUser;
+
+  console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`);
+
+  res.redirect("/urls")
+});
+
+
+
 // Receives a login request and username
 app.post("/login", (req, res) => {
   console.log(`Login request received from ${req.body.username}.`);
@@ -100,6 +175,9 @@ app.get("/urls/:id", (req, res) => {
 
   res.render("urls_show", templateVars);
 });
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`)
