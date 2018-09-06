@@ -1,14 +1,13 @@
 <h1>Lilliputifier:</h1>
 <p>Tying down the largest addresses since 1726.</p>
 <br>
-</div>
-<div class="hello user">
-  <% if (username) { %>
+<% if (username) { %>
     <p>Welcome back, <%=username%>!</p>
-  <form method="post" action="/logout">
-    <button type="submit">Logout</button>
-  </form>
-
-  <% } %>
-</div>
+    <form method="post" action="/logout">
+      <button type="submit">Logout</button>
+    </form>
+<% } else { %>
+    <p>Hello, unregistered user!</p>
+    <p><a href="/register">Register</a> or <a href="/login">Login</a>?</p>
+<% } %>
 <hr>
