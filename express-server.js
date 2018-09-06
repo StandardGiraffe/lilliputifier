@@ -133,14 +133,15 @@ app.get("/urls", (req, res) => {
   // I believe what we're doing here is instantiating an object to contain the url database, and then passing that as a variable into urls_index, where it can be called (and iterated through).
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    username: req.cookies["user_id"],
+    users: usersDB
   };
   res.render("urls_index", templateVars);
 });
 
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let templateVars = { username: req.cookies["user_id"] };
   res.render("urls_new", templateVars);
 });
 
@@ -189,9 +190,8 @@ app.post("/register", (req, res) => {
     createNewUser(userEmail, userPassword);
 
     // console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`); // Prove the record was added.
-    console.log(findUserByEmail(userEmail).id);
 
-    res.cookie("username", findUserByEmail(userEmail).id);
+    res.cookie("user_id", findUserByEmail(userEmail).id);
     res.redirect("/urls")
 
   }
@@ -210,7 +210,7 @@ app.post("/login", (req, res) => {
 // Receives a logout request
 app.post("/logout", (req, res) => {
   console.log(`Logout request received.  Destroying cookie!`);
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -233,7 +233,8 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = {
     "shortURL": req.params.id,
     "fullURL": urlDatabase[req.params.id],
-    "username": req.cookies["username"]
+    "username": req.cookies["user_id"],
+    "users": usersDB
   };
 
   res.render("urls_show", templateVars);
