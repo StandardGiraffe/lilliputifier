@@ -215,7 +215,7 @@ app.post("/login", (req, res) => {
     res.send("I found you, but that's the wrong password, Bub.");
   } else {
 
-    // res.cookie("user_id", req.body.email);
+    res.cookie("user_id", findUserByEmail(req.body.email).id);
     res.redirect("/urls");
   }
 
