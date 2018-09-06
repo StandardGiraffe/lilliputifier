@@ -117,7 +117,7 @@ const authenticateUser = (email, password) => {
 // Routing:
 // ######
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 
 app.get("/hello", (req, res) => {
@@ -207,16 +207,13 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   console.log(`Login request received from ${req.body.username}.`);
 
-  if (!findUserByEmail(req.body.email)) {
+  if (!findUserByEmail(req.body.email) || findUserByEmail(req.body.email).password !== req.body.password) {
     res.status(403);
-    res.send("There is no user with that email address.");
-  } else if (findUserByEmail(req.body.email).password !== req.body.password) {
-    res.status(403);
-    res.send("I found you, but that's the wrong password, Bub.");
+    res.send("Your email and password don't match, Bub.");
   } else {
 
     res.cookie("user_id", findUserByEmail(req.body.email).id);
-    res.redirect("/urls");
+    res.redirect("/");
   }
 
 });
