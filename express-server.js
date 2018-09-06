@@ -55,6 +55,7 @@ const usersDB = {
 // Functions:
 // ######
 
+// Generates a new user account object with supplied credentials.
 const createNewUser = function (id, email, password) {
   const newRecord = {
     "id": id,
@@ -65,7 +66,40 @@ const createNewUser = function (id, email, password) {
   return newRecord;
 };
 
+// Alphanumeric random ID generator.  Adapted from https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+const generateRandomString = function (length) {
+  let text = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+  for (let i = 0; i < length; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+};
+
+// Search user records for a specified value.
+const findUserByEmail = function (email) {
+  for (let user_id in usersDB) {
+    const user = usersDB[user_id]
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
+}
+
+/*
+// Built by Robert...
+const authenticateUser = (email, password) => {
+  const user = findUserByEmail(email)
+  if (user && user.password === password) {
+    return user
+  } else {
+    return null
+  }
+  //return user && user.password === password ? user : null
+}
+*/
 
 // ######
 // Routing:
@@ -126,7 +160,10 @@ app.post("/register", (req, res) => {
   // Handle registration errors:
   if (req.body.password !== req.body.confirmPassword || !req.body.password || !req.body.email) {
     res.send("Problem with supplied credentials.  Check email and ensure passwords match.");
-    res.status(400);
+    res.status(400);  // Password mismatch, no password supplied, no email supplied
+
+  } else if (findUserByEmail(req.body.email)) {
+    res.send("This email already exists in our database.  Please use a different one.");
 
   } else {
     // Otherwise, it works!
@@ -142,7 +179,7 @@ app.post("/register", (req, res) => {
     // Adds the new accout object to the database so that the key name matches the random ID
     usersDB[generatedID] = newUser;
 
-    console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`); // Prove the record was added.
+    // console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`); // Prove the record was added.
 
     res.redirect("/urls")
 
@@ -198,13 +235,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`)
 });
 
-// Alphanumeric random ID generator.  Adapted from https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
-function generateRandomString(length) {
-  let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (let i = 0; i < length; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return text;
-};
