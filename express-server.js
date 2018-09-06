@@ -64,10 +64,17 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Receives a login request and username
 app.post("/login", (req, res) => {
-  console.log(`Login request received from ${req.body.username}.  Did it work?`);
+  console.log(`Login request received from ${req.body.username}.`);
   res.cookie("username", req.body.username);
   res.redirect("/urls");
-})
+});
+
+// Receives a logout request
+app.post("/logout", (req, res) => {
+  console.log(`Logout request received.  Destroying cookie!`);
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
 
 // Deletes a record.
 app.post("/urls/:id/delete", (req, res) => {

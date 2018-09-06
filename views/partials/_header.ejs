@@ -12,6 +12,10 @@
 <div class="hello user">
   <% if (username) { %>
     <p>Welcome back, <%=username%>!</p>
+  <form method="post" action="/logout">
+    <button type="submit">Logout</button>
+  </form>
+
   <% } %>
 </div>
 <hr>
