@@ -206,8 +206,19 @@ app.post("/register", (req, res) => {
 // Receives a login request and username
 app.post("/login", (req, res) => {
   console.log(`Login request received from ${req.body.username}.`);
-  res.cookie("user_id", req.body.username);
-  res.redirect("/urls");
+
+  if (!findUserByEmail(req.body.email)) {
+    res.status(403);
+    res.send("There is no user with that email address.");
+  } else if (findUserByEmail(req.body.email).password !== req.body.password) {
+    res.status(403);
+    res.send("I found you, but that's the wrong password, Bub.");
+  } else {
+
+    // res.cookie("user_id", req.body.email);
+    res.redirect("/urls");
+  }
+
 });
 
 // Receives a logout request
