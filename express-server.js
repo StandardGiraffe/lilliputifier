@@ -290,21 +290,29 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // Updates Lilliput pointers
 app.post("/urls/:id", (req, res) => {
+
   console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDB[req.params.id].longURL + " to " + req.body.longURL);
   urlDB[req.params.id].longURL = req.body.longURL;
   console.log(`DONE: www.lilli.put/${req.params.id} now points to ${urlDB[req.params.id].longURL}\n`);
   res.redirect("/urls");
+
 })
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {
-    "shortURL": urlDB[req.params.id].shortURL,
-    "longURL": urlDB[req.params.id].longURL,
-    "username": req.cookies["user_id"],
-    "users": usersDB
-  };
+  if (urlDB[req.params.id].ownerID !== req.cookies["user_id"]) {
+    res.status(401);
+    res.send(`'T'isn't thine to tweak.`);
 
-  res.render("urls_show", templateVars);
+  } else {
+    let templateVars = {
+      "shortURL": urlDB[req.params.id].shortURL,
+      "longURL": urlDB[req.params.id].longURL,
+      "username": req.cookies["user_id"],
+      "users": usersDB
+    };
+
+    res.render("urls_show", templateVars);
+  };
 });
 
 
