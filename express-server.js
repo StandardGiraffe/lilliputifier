@@ -84,6 +84,17 @@ const createNewUser = function (email, password) {
   return newRecord;
 };
 
+const createNewURL = function (shortURL, longURL, ownerID) {
+  const newRecord = {
+    "shortURL": shortURL,
+    "longURL": longURL,
+    "ownerID": ownerID
+  };
+
+  urlDB[shortURL] = newRecord;
+}
+
+
 // Alphanumeric random ID generator.  Adapted from https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
 const generateRandomString = function (length) {
   let text = "";
@@ -166,12 +177,18 @@ app.get("/urls/new", (req, res) => {
 
 });
 
+// #########################################
+// #########################################
+// #########################################
+// ##############Work here##################
+// #########################################
+// #########################################
 app.post("/urls", (req, res) => {
   console.log(req.body); // debug statement to see POST parameters
-  let newShortURL = generateRandomString(6);
-  urlDB[newShortURL] = req.body.longURL;
+  let newShortURL = generateRandomString(8);
+  createNewURL(newShortURL, req.body.longURL, req.cookies["user_id"]);
+
   res.redirect("/urls/" + newShortURL);
-  // res.send(urlDB); // Respond with "Ok" (we will replace this)
 });
 
 app.get("/u/:shortURL", (req, res) => {
