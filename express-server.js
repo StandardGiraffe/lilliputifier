@@ -30,7 +30,7 @@ app.use(cookieParser());
 // ######
 
 // Shortened URLs:
-const urlDatabase = {
+const urlDB = {
   "b2xVn2": {
     shortURL: "b2xVn2",
     longURL: "http://www.lighthouselabs.ca",
@@ -139,13 +139,13 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  res.json(urlDB);
 });
 
 app.get("/urls", (req, res) => {
 
   let templateVars = {
-    urlDatabase: urlDatabase,
+    urlDB: urlDB,
     username: req.cookies["user_id"],
     users: usersDB
   };
@@ -169,14 +169,14 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body); // debug statement to see POST parameters
   let newShortURL = generateRandomString(6);
-  urlDatabase[newShortURL] = req.body.longURL;
+  urlDB[newShortURL] = req.body.longURL;
   res.redirect("/urls/" + newShortURL);
-  // res.send(urlDatabase); // Respond with "Ok" (we will replace this)
+  // res.send(urlDB); // Respond with "Ok" (we will replace this)
 });
 
 app.get("/u/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL].longURL;
+  let longURL = urlDB[shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -249,23 +249,23 @@ app.post("/logout", (req, res) => {
 
 // Deletes a record.
 app.post("/urls/:id/delete", (req, res) => {
-  console.log("Deleted the record for " + urlDatabase[req.params.id]);
-  delete urlDatabase[req.params.id];
+  console.log("Deleted the record for " + urlDB[req.params.id]);
+  delete urlDB[req.params.id];
   res.redirect("/urls");
 })
 
 // Updates Lilliput pointers
 app.post("/urls/:id", (req, res) => {
-  console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDatabase[req.params.id].longURL + " to " + req.body.longURL);
-  urlDatabase[req.params.id].longURL = req.body.longURL;
-  console.log(`DONE: www.lilli.put/${req.params.id} now points to ${urlDatabase[req.params.id].longURL}\n`);
+  console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDB[req.params.id].longURL + " to " + req.body.longURL);
+  urlDB[req.params.id].longURL = req.body.longURL;
+  console.log(`DONE: www.lilli.put/${req.params.id} now points to ${urlDB[req.params.id].longURL}\n`);
   res.redirect("/urls");
 })
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
-    "shortURL": urlDatabase[req.params.id].shortURL,
-    "longURL": urlDatabase[req.params.id].longURL,
+    "shortURL": urlDB[req.params.id].shortURL,
+    "longURL": urlDB[req.params.id].longURL,
     "username": req.cookies["user_id"],
     "users": usersDB
   };

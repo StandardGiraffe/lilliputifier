@@ -19,8 +19,8 @@
     <div class="master list">
       <h2>Lilliputesyoudid:</h2>
       <ul>
-        <% for (record in urlDatabase) { %>
-          <li>www.lilli.put/<strong><%= urlDatabase[record].shortURL %></strong> 👉 <%= urlDatabase[record].longURL %> <br> <a href="/urls/<%= urlDatabase[record].shortURL %>">Lillipointsomewhereelse?</a> <form method="POST" action="/urls/<%= urlDatabase[record].shortURL %>/delete"><button type="submit">Delete</button></form><br></li>
+        <% for (record in urlDB) { %>
+          <li>www.lilli.put/<strong><%= urlDB[record].shortURL %></strong> 👉 <%= urlDB[record].longURL %> <br> <a href="/urls/<%= urlDB[record].shortURL %>">Lillipointsomewhereelse?</a> <form method="POST" action="/urls/<%= urlDB[record].shortURL %>/delete"><button type="submit">Delete</button></form><br></li>
         <% }; %>
       </ul>
     </div>
