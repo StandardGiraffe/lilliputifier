@@ -308,7 +308,7 @@ app.post("/urls/:id", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   if (urlDB[req.params.id].ownerID !== req.cookies["user_id"]) {
     res.status(401);
-    res.send(`'T'isn't thine to tweak.`);
+    res.send(`This isn't your URL.`);
 
   } else {
     let templateVars = {
