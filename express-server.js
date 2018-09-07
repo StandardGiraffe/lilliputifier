@@ -127,14 +127,15 @@ const findUserByID = function (id) {
 }
 
 // Checks authorship of a shortURL
-const isURLMine = function (shortURL, user_id) {
+const findURLsByUser = function (user_id) {
+  const userURLDB = [];
+
   for (let record in urlDB) {
-    const targetURL = urlDB[record];
-    if (targetURL.shortURL === user_id) {
-      return targetURL;
+    if (urlDB[record].ownerID === user_id) {
+      userURLDB.push(urlDB[record]);
     }
   }
-  return null;
+  return userURLDB;
 }
 
 
@@ -172,10 +173,11 @@ app.get("/urls", (req, res) => {
   } else {
 
     let templateVars = {
-      urlDB: urlDB,
+      urlDB: findURLsByUser(req.cookies["user_id"]),
       username: req.cookies["user_id"],
       users: usersDB
     }
+    console.log("Current DB contains: " + findURLsByUser(req.cookies["user_id"]));
     res.render("urls_index", templateVars);
   }
 });
