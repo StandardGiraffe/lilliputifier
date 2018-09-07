@@ -167,12 +167,17 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
 
-  let templateVars = {
-    urlDB: urlDB,
-    username: req.cookies["user_id"],
-    users: usersDB
-  };
-  res.render("urls_index", templateVars);
+  if (!findUserByID(req.cookies["user_id"])) {
+    res.redirect("/login");
+  } else {
+
+    let templateVars = {
+      urlDB: urlDB,
+      username: req.cookies["user_id"],
+      users: usersDB
+    }
+    res.render("urls_index", templateVars);
+  }
 });
 
 
