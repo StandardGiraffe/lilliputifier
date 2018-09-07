@@ -1,19 +1,18 @@
 // ######
 // Require dependencies:
 // ######
-
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser=require("cookie-parser");
-
+const bcrypt = require("bcrypt");
 
 
 // ######
 // Global constants:
 // ######
 const PORT = 8080;
-
+const saltRounds = 10;
 
 
 // ######
@@ -73,10 +72,15 @@ const usersDB = {
 // Generates a new user account object with supplied credentials.
 const createNewUser = function (email, password) {
   const id = generateRandomString(6);
+
+  // Hash password:
+  hashedPassword = bcrypt.hashSync(password, saltRounds);
+  console.log(`Password ${password} has been hashed to ${hashedPassword}`)
+
   const newRecord = {
     "id": id,
     "email": email,
-    "password": password
+    "password": hashedPassword
   };
 
   // Adds the new accout object to the database so that the key name matches the random ID
@@ -139,13 +143,15 @@ const findURLsByUser = function (user_id) {
 }
 
 
-// Built by Robert...
+// Adapted from build by Robert...
 const authenticateUser = (email, password) => {
-  const user = findUserByEmail(email)
-  if (user && user.password === password) {
-    return user
+  const user = findUserByEmail(email);
+  // const passwordCheck = bcrypt.compareSync(password, user.password);
+
+  if (user && bcrypt.compareSync(password, user.password)) {
+    return user;
   } else {
-    return null
+    return null;
   }
   //return user && user.password === password ? user : null
 }
@@ -260,7 +266,8 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   console.log(`Login request received from ${req.body.username}.`);
 
-  if (!findUserByEmail(req.body.email) || findUserByEmail(req.body.email).password !== req.body.password) {
+  // if (!findUserByEmail(req.body.email) || findUserByEmail(req.body.email).password !== req.body.password) {
+  if (!authenticateUser(req.body.email, req.body.password)) {
     res.status(403);
     res.send("Your email and password don't match, Bub.");
   } else {
