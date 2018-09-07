@@ -177,12 +177,7 @@ app.get("/urls/new", (req, res) => {
 
 });
 
-// #########################################
-// #########################################
-// #########################################
-// ##############Work here##################
-// #########################################
-// #########################################
+// Creates a new shortened URL
 app.post("/urls", (req, res) => {
   console.log(req.body); // debug statement to see POST parameters
   let newShortURL = generateRandomString(8);
