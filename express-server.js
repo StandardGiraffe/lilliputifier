@@ -31,8 +31,23 @@ app.use(cookieParser());
 
 // Shortened URLs:
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    shortURL: "b2xVn2",
+    longURL: "http://www.lighthouselabs.ca",
+    ownerID: "user2example"
+  },
+
+  "9sm5xK": {
+    shortURL: "9sm5xK",
+    longURL: "http://www.google.com",
+    ownerID: "user1example",
+  },
+
+  "newstyle83419": {
+    shortURL: "newstyle83419",
+    longURL: "www.example.com",
+    ownerID: "user2example"
+  }
 };
 
 // Users:
@@ -130,7 +145,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
 
   let templateVars = {
-    urls: urlDatabase,
+    urlDatabase: urlDatabase,
     username: req.cookies["user_id"],
     users: usersDB
   };
@@ -161,7 +176,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL];
+  let longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -241,16 +256,16 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // Updates Lilliput pointers
 app.post("/urls/:id", (req, res) => {
-  console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDatabase[req.params.id] + " to " + req.body.fullURL);
-  urlDatabase[req.params.id] = req.body.fullURL;
-  console.log(`DONE: www.lilli.put/${req.params.id} now points to ${urlDatabase[req.params.id]}\n`);
+  console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDatabase[req.params.id].longURL + " to " + req.body.longURL);
+  urlDatabase[req.params.id].longURL = req.body.longURL;
+  console.log(`DONE: www.lilli.put/${req.params.id} now points to ${urlDatabase[req.params.id].longURL}\n`);
   res.redirect("/urls");
 })
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
-    "shortURL": req.params.id,
-    "fullURL": urlDatabase[req.params.id],
+    "shortURL": urlDatabase[req.params.id].shortURL,
+    "longURL": urlDatabase[req.params.id].longURL,
     "username": req.cookies["user_id"],
     "users": usersDB
   };
