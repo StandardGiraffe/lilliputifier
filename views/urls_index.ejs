@@ -13,14 +13,14 @@
 
     <div class="new URLs">
       <h2>Lilliputagain!</h2>
-      <p><a href="#">Click here to create a new shortened URL.</a></p>
+      <p><a href="/urls/new">Click here to create a new shortened URL.</a></p>
     </div>
 
     <div class="master list">
       <h2>Lilliputesyoudid:</h2>
       <ul>
-        <% for (lilliputs in urls) { %>
-          <li>www.lilli.put/<strong><%= lilliputs %></strong> 👉 <%= urls[lilliputs] %> <br> <a href="/urls/<%= lilliputs %>">Lillipointsomewhereelse?</a> <form method="POST" action="/urls/<%= lilliputs %>/delete"><button type="submit">Delete</button></form><br></li>
+        <% for (record in urlDB) { %>
+          <li>www.lilli.put/<strong><%= urlDB[record].shortURL %></strong> 👉 <%= urlDB[record].longURL %> <br> <a href="/urls/<%= urlDB[record].shortURL %>">Lillipointsomewhereelse?</a> <form method="POST" action="/urls/<%= urlDB[record].shortURL %>/delete"><button type="submit">Delete</button></form><br></li>
         <% }; %>
       </ul>
     </div>

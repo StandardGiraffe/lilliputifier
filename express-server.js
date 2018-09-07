@@ -30,9 +30,24 @@ app.use(cookieParser());
 // ######
 
 // Shortened URLs:
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+const urlDB = {
+  "b2xVn2": {
+    shortURL: "b2xVn2",
+    longURL: "http://www.lighthouselabs.ca",
+    ownerID: "user2example"
+  },
+
+  "9sm5xK": {
+    shortURL: "9sm5xK",
+    longURL: "http://www.google.com",
+    ownerID: "user1example",
+  },
+
+  "newstyle83419": {
+    shortURL: "newstyle83419",
+    longURL: "www.example.com",
+    ownerID: "user2example"
+  }
 };
 
 // Users:
@@ -69,6 +84,17 @@ const createNewUser = function (email, password) {
   return newRecord;
 };
 
+const createNewURL = function (shortURL, longURL, ownerID) {
+  const newRecord = {
+    "shortURL": shortURL,
+    "longURL": longURL,
+    "ownerID": ownerID
+  };
+
+  urlDB[shortURL] = newRecord;
+}
+
+
 // Alphanumeric random ID generator.  Adapted from https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
 const generateRandomString = function (length) {
   let text = "";
@@ -82,7 +108,7 @@ const generateRandomString = function (length) {
 
 const findUserByEmail = function (email) {
   for (let record in usersDB) {
-    const user = usersDB[record]
+    const user = usersDB[record];
     if (user.email === email) {
       return user; // returns that whole record
     }
@@ -90,14 +116,26 @@ const findUserByEmail = function (email) {
   return null;
 }
 
-const findUsernameById = function (userID) {
+const findUserByID = function (id) {
   for (let record in usersDB) {
-    const user = usersDB[record]
+    const user = usersDB[record];
     if (user.id === id) {
-      return user.email;
+      return user;
     }
   }
   return null;
+}
+
+// Checks authorship of a shortURL
+const findURLsByUser = function (user_id) {
+  const userURLDB = [];
+
+  for (let record in urlDB) {
+    if (urlDB[record].ownerID === user_id) {
+      userURLDB.push(urlDB[record]);
+    }
+  }
+  return userURLDB;
 }
 
 
@@ -125,36 +163,51 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  res.json(urlDB);
 });
 
 app.get("/urls", (req, res) => {
 
-  let templateVars = {
-    urls: urlDatabase,
-    username: req.cookies["user_id"],
-    users: usersDB
-  };
-  res.render("urls_index", templateVars);
+  if (!findUserByID(req.cookies["user_id"])) {
+    res.redirect("/login");
+  } else {
+
+    let templateVars = {
+      urlDB: findURLsByUser(req.cookies["user_id"]),
+      username: req.cookies["user_id"],
+      users: usersDB
+    }
+    console.log("Current DB contains: " + findURLsByUser(req.cookies["user_id"]));
+    res.render("urls_index", templateVars);
+  }
 });
 
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["user_id"] };
-  res.render("urls_new", templateVars);
+
+  if (!findUserByID(req.cookies["user_id"])) {
+    res.redirect("/login");
+  } else {
+
+    let templateVars = { username: req.cookies["user_id"] };
+    res.render("urls_new", templateVars);
+
+  }
+
 });
 
+// Creates a new shortened URL
 app.post("/urls", (req, res) => {
   console.log(req.body); // debug statement to see POST parameters
-  let newShortURL = generateRandomString(6);
-  urlDatabase[newShortURL] = req.body.longURL;
+  let newShortURL = generateRandomString(8);
+  createNewURL(newShortURL, req.body.longURL, req.cookies["user_id"]);
+
   res.redirect("/urls/" + newShortURL);
-  // res.send(urlDatabase); // Respond with "Ok" (we will replace this)
 });
 
 app.get("/u/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL];
+  let longURL = urlDB[shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -225,30 +278,48 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-// Deletes a record.
+// Deletes a record if it was authored by the current user.
 app.post("/urls/:id/delete", (req, res) => {
-  console.log("Deleted the record for " + urlDatabase[req.params.id]);
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
+
+  //  Check to see if the shortURL's owner is the current user.
+  if (urlDB[req.params.id].ownerID !== req.cookies["user_id"]) {
+    res.status(401);
+    res.send(`'T'isn't thine to smite.`);
+  } else {
+
+    console.log("Deleted the record for " + urlDB[req.params.id]);
+    delete urlDB[req.params.id];
+    res.redirect("/urls");
+
+  }
+
 })
 
 // Updates Lilliput pointers
 app.post("/urls/:id", (req, res) => {
-  console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDatabase[req.params.id] + " to " + req.body.fullURL);
-  urlDatabase[req.params.id] = req.body.fullURL;
-  console.log(`DONE: www.lilli.put/${req.params.id} now points to ${urlDatabase[req.params.id]}\n`);
+
+  console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDB[req.params.id].longURL + " to " + req.body.longURL);
+  urlDB[req.params.id].longURL = req.body.longURL;
+  console.log(`DONE: www.lilli.put/${req.params.id} now points to ${urlDB[req.params.id].longURL}\n`);
   res.redirect("/urls");
+
 })
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {
-    "shortURL": req.params.id,
-    "fullURL": urlDatabase[req.params.id],
-    "username": req.cookies["user_id"],
-    "users": usersDB
-  };
+  if (urlDB[req.params.id].ownerID !== req.cookies["user_id"]) {
+    res.status(401);
+    res.send(`This isn't your URL.`);
 
-  res.render("urls_show", templateVars);
+  } else {
+    let templateVars = {
+      "shortURL": urlDB[req.params.id].shortURL,
+      "longURL": urlDB[req.params.id].longURL,
+      "username": req.cookies["user_id"],
+      "users": usersDB
+    };
+
+    res.render("urls_show", templateVars);
+  };
 });
 
 
