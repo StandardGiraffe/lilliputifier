@@ -1,19 +1,19 @@
 // ######
 // Require dependencies:
 // ######
-
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const cookieParser=require("cookie-parser");
-
+// const cookieParser=require("cookie-parser");
+const bcrypt = require("bcrypt");
+const cookieSession = require("cookie-session");
 
 
 // ######
 // Global constants:
 // ######
 const PORT = 8080;
-
+const saltRounds = 10;
 
 
 // ######
@@ -21,7 +21,11 @@ const PORT = 8080;
 // ######
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+// app.use(cookieParser());
+app.use(cookieSession({
+  name: "session",
+  keys: ["flabbahbabbahwoopwoopwoop"]
+}));
 
 
 
@@ -73,10 +77,15 @@ const usersDB = {
 // Generates a new user account object with supplied credentials.
 const createNewUser = function (email, password) {
   const id = generateRandomString(6);
+
+  // Hash password:
+  hashedPassword = bcrypt.hashSync(password, saltRounds);
+  console.log(`Password ${password} has been hashed to ${hashedPassword}`)
+
   const newRecord = {
     "id": id,
     "email": email,
-    "password": password
+    "password": hashedPassword
   };
 
   // Adds the new accout object to the database so that the key name matches the random ID
@@ -139,13 +148,15 @@ const findURLsByUser = function (user_id) {
 }
 
 
-// Built by Robert...
+// Adapted from build by Robert...
 const authenticateUser = (email, password) => {
-  const user = findUserByEmail(email)
-  if (user && user.password === password) {
-    return user
+  const user = findUserByEmail(email);
+  // const passwordCheck = bcrypt.compareSync(password, user.password);
+
+  if (user && bcrypt.compareSync(password, user.password)) {
+    return user;
   } else {
-    return null
+    return null;
   }
   //return user && user.password === password ? user : null
 }
@@ -168,16 +179,16 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
 
-  if (!findUserByID(req.cookies["user_id"])) {
+  if (!findUserByID(req.session.user_id)) {
     res.redirect("/login");
   } else {
 
     let templateVars = {
-      urlDB: findURLsByUser(req.cookies["user_id"]),
-      username: req.cookies["user_id"],
+      urlDB: findURLsByUser(req.session.user_id),
+      username: req.session.user_id,
       users: usersDB
     }
-    console.log("Current DB contains: " + findURLsByUser(req.cookies["user_id"]));
+    console.log("Current DB contains: " + findURLsByUser(req.session.user_id));
     res.render("urls_index", templateVars);
   }
 });
@@ -185,11 +196,11 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
 
-  if (!findUserByID(req.cookies["user_id"])) {
+  if (!findUserByID(req.session.user_id)) {
     res.redirect("/login");
   } else {
 
-    let templateVars = { username: req.cookies["user_id"] };
+    let templateVars = { username: req.session.user_id };
     res.render("urls_new", templateVars);
 
   }
@@ -200,7 +211,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body); // debug statement to see POST parameters
   let newShortURL = generateRandomString(8);
-  createNewURL(newShortURL, req.body.longURL, req.cookies["user_id"]);
+  createNewURL(newShortURL, req.body.longURL, req.session.user_id);
 
   res.redirect("/urls/" + newShortURL);
 });
@@ -247,7 +258,7 @@ app.post("/register", (req, res) => {
 
     // console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`); // Prove the record was added.
 
-    res.cookie("user_id", findUserByEmail(userEmail).id);
+    req.session.user_id = findUserByEmail(userEmail).id;
     res.redirect("/urls")
 
   }
@@ -260,12 +271,13 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   console.log(`Login request received from ${req.body.username}.`);
 
-  if (!findUserByEmail(req.body.email) || findUserByEmail(req.body.email).password !== req.body.password) {
+  // if (!findUserByEmail(req.body.email) || findUserByEmail(req.body.email).password !== req.body.password) {
+  if (!authenticateUser(req.body.email, req.body.password)) {
     res.status(403);
     res.send("Your email and password don't match, Bub.");
   } else {
 
-    res.cookie("user_id", findUserByEmail(req.body.email).id);
+    req.session.user_id = findUserByEmail(req.body.email).id;
     res.redirect("/");
   }
 
@@ -274,7 +286,7 @@ app.post("/login", (req, res) => {
 // Receives a logout request
 app.post("/logout", (req, res) => {
   console.log(`Logout request received.  Destroying cookie!`);
-  res.clearCookie("user_id");
+  req.session.user_id = null;
   res.redirect("/urls");
 });
 
@@ -282,7 +294,7 @@ app.post("/logout", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
 
   //  Check to see if the shortURL's owner is the current user.
-  if (urlDB[req.params.id].ownerID !== req.cookies["user_id"]) {
+  if (urlDB[req.params.id].ownerID !== req.session.user_id) {
     res.status(401);
     res.send(`'T'isn't thine to smite.`);
   } else {
@@ -306,7 +318,7 @@ app.post("/urls/:id", (req, res) => {
 })
 
 app.get("/urls/:id", (req, res) => {
-  if (urlDB[req.params.id].ownerID !== req.cookies["user_id"]) {
+  if (urlDB[req.params.id].ownerID !== req.session.user_id) {
     res.status(401);
     res.send(`This isn't your URL.`);
 
@@ -314,7 +326,7 @@ app.get("/urls/:id", (req, res) => {
     let templateVars = {
       "shortURL": urlDB[req.params.id].shortURL,
       "longURL": urlDB[req.params.id].longURL,
-      "username": req.cookies["user_id"],
+      "username": req.session.user_id,
       "users": usersDB
     };
 
