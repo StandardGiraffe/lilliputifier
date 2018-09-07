@@ -126,6 +126,18 @@ const findUserByID = function (id) {
   return null;
 }
 
+// Checks authorship of a shortURL
+const isURLMine = function (shortURL, user_id) {
+  for (let record in urlDB) {
+    const targetURL = urlDB[record];
+    if (targetURL.shortURL === user_id) {
+      return targetURL;
+    }
+  }
+  return null;
+}
+
+
 // Built by Robert...
 const authenticateUser = (email, password) => {
   const user = findUserByEmail(email)
@@ -259,11 +271,21 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-// Deletes a record.
+// Deletes a record if it was authored by the current user.
 app.post("/urls/:id/delete", (req, res) => {
-  console.log("Deleted the record for " + urlDB[req.params.id]);
-  delete urlDB[req.params.id];
-  res.redirect("/urls");
+
+  //  Check to see if the shortURL's owner is the current user.
+  if (urlDB[req.params.id].ownerID !== req.cookies["user_id"]) {
+    res.status(401);
+    res.send(`'T'isn't thine to smite.`);
+  } else {
+
+    console.log("Deleted the record for " + urlDB[req.params.id]);
+    delete urlDB[req.params.id];
+    res.redirect("/urls");
+
+  }
+
 })
 
 // Updates Lilliput pointers
