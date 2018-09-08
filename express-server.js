@@ -330,6 +330,7 @@ app.get("/urls/:id", (req, res) => {
       "shortURL": urlDB[req.params.id].shortURL,
       "longURL": urlDB[req.params.id].longURL,
       "username": req.session.user_id,
+      // "urlDB": urlDB[req.params.id],
       "users": usersDB
     };
 
