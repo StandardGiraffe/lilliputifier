@@ -1,37 +1,34 @@
-// ######
-// Require dependencies:
-// ######
+// #####################
+// Require Dependencies:
+// #####################
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-// const cookieParser=require("cookie-parser");
 const bcrypt = require("bcrypt");
 const cookieSession = require("cookie-session");
 
 
-// ######
-// Global constants:
-// ######
+// #################
+// Global Constants:
+// #################
 const PORT = 8080;
 const saltRounds = 10;
 
 
-// ######
+// ##########################
 // Middleware Initialization:
-// ######
+// ##########################
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
-// app.use(cookieParser());
 app.use(cookieSession({
   name: "session",
   keys: ["flabbahbabbahwoopwoopwoop"]
 }));
 
 
-
-// ######
+// #########
 // Databases
-// ######
+// #########
 
 // Shortened URLs:
 const urlDB = {
@@ -47,8 +44,8 @@ const urlDB = {
     ownerID: "user1example",
   },
 
-  "newstyle83419": {
-    shortURL: "newstyle83419",
+  "83419d": {
+    shortURL: "83419d",
     longURL: "www.example.com",
     ownerID: "user2example"
   }
@@ -70,11 +67,10 @@ const usersDB = {
 };
 
 
-// ######
+// ##########
 // Functions:
-// ######
+// ##########
 
-// Generates a new user account object with supplied credentials.
 const createNewUser = function (email, password) {
   const id = generateRandomString(6);
 
@@ -91,7 +87,7 @@ const createNewUser = function (email, password) {
   // Adds the new accout object to the database so that the key name matches the random ID
   usersDB[id] = newRecord;
   return newRecord;
-};
+}
 
 const createNewURL = function (shortURL, longURL, ownerID) {
   const newRecord = {
@@ -103,17 +99,16 @@ const createNewURL = function (shortURL, longURL, ownerID) {
   urlDB[shortURL] = newRecord;
 }
 
-
 // Alphanumeric random ID generator.  Adapted from https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
 const generateRandomString = function (length) {
-  let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let outputString = "";
+  const characterPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   for (let i = 0; i < length; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
+    outputString += characterPool.charAt(Math.floor(Math.random() * characterPool.length));
 
-  return text;
-};
+  return outputString;
+}
 
 const findUserByEmail = function (email) {
   for (let record in usersDB) {
@@ -135,7 +130,7 @@ const findUserByID = function (id) {
   return null;
 }
 
-// Checks authorship of a shortURL
+// Return a database of URL records belonging to the provided user_id
 const findURLsByUser = function (user_id) {
   const userURLDB = [];
 
@@ -147,36 +142,62 @@ const findURLsByUser = function (user_id) {
   return userURLDB;
 }
 
-
-// Adapted from build by Robert...
 const authenticateUser = (email, password) => {
   const user = findUserByEmail(email);
-  // const passwordCheck = bcrypt.compareSync(password, user.password);
 
   if (user && bcrypt.compareSync(password, user.password)) {
     return user;
   } else {
     return null;
   }
-  //return user && user.password === password ? user : null
 }
 
 
-// ######
+// ########
 // Routing:
-// ######
+// ########
+
+// ## Diagnostics: ##
+/*
+// DIAGNOSTIC: View the complete URL database.  KEEP OFF BY DEFAULT.
+app.get("/urls.json", (req, res) => {
+  res.json(urlDB);
+});
+*/
+
+/*
+// DIAGNOSTIC: View the complete user database.  KEEP OFF BY DEFAULT.
+app.get("/users.json", (req, res) => {
+  res.json(usersDB);
+});
+*/
+
+
+// ## Redirects: ##
+
+// Redirect unspecified traffic to the main page
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n")
+// New user registration page
+app.get("/register", (req, res) => {
+  res.render("register");
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDB);
+// Login page
+app.get("/login", (req, res) => {
+  res.render("urls_login");
 });
 
+// Redirect user to the long URL
+app.get("/u/:shortURL", (req, res) => {
+  let shortURL = req.params.shortURL;
+  let longURL = urlDB[shortURL].longURL;
+  res.redirect(longURL);
+});
+
+// Index page: Display current user's URLs or redirect unregistered user to login/register
 app.get("/urls", (req, res) => {
 
   if (!findUserByID(req.session.user_id)) {
@@ -193,7 +214,7 @@ app.get("/urls", (req, res) => {
   }
 });
 
-
+// New URL form or redirect unregistered users to login/register
 app.get("/urls/new", (req, res) => {
 
   if (!findUserByID(req.session.user_id)) {
@@ -207,8 +228,28 @@ app.get("/urls/new", (req, res) => {
     res.render("urls_new", templateVars);
 
   }
-
 });
+
+// Update existing shortened URL page if owned by current user
+app.get("/urls/:id", (req, res) => {
+  if (urlDB[req.params.id].ownerID !== req.session.user_id) {
+    res.status(401);
+    res.send(`This isn't your URL.`);
+
+  } else {
+    let templateVars = {
+      "shortURL": urlDB[req.params.id].shortURL,
+      "longURL": urlDB[req.params.id].longURL,
+      "username": req.session.user_id,
+      "users": usersDB
+    }
+
+    res.render("urls_show", templateVars);
+  }
+});
+
+
+// ## User-Driven Record Management ##
 
 // Creates a new shortened URL
 app.post("/urls", (req, res) => {
@@ -219,25 +260,25 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls/" + newShortURL);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  let shortURL = req.params.shortURL;
-  let longURL = urlDB[shortURL].longURL;
-  res.redirect(longURL);
+// Updates an existing shortened URL to point to another location
+app.post("/urls/:id", (req, res) => {
+  urlDB[req.params.id].longURL = req.body.longURL;
+  res.redirect("/urls");
+})
+
+// Deletes a shortened URL if it was authored by the current user.
+app.post("/urls/:id/delete", (req, res) => {
+  //  Check to see if the shortURL's owner is the current user.
+  if (urlDB[req.params.id].ownerID !== req.session.user_id) {
+    res.status(401);
+    res.send(`'T'isn't thine to smite.`);
+  } else {
+    delete urlDB[req.params.id];
+    res.redirect("/urls");
+  }
 });
 
-// Login page
-app.get("/login", (req, res) => {
-  res.render("urls_login");
-});
-
-
-// USER REGISTRATION:
-// Registration page:
-app.get("/register", (req, res) => {
-  res.render("register");
-});
-
-// Register based on input:
+// Registers a new user record
 app.post("/register", (req, res) => {
 
   // Handle registration errors:
@@ -250,98 +291,44 @@ app.post("/register", (req, res) => {
     res.status(400);  // supplied email matches another email in the database
 
   } else {
-    // Otherwise, it works!
 
-    // Get the user-input from the forms and name them.
     userEmail = req.body.email;
     userPassword = req.body.password;
 
-    // Build the new account object
     createNewUser(userEmail, userPassword);
-
-    // console.log(`The complete database is\n\n${JSON.stringify(usersDB)}`); // Prove the record was added.
 
     req.session.user_id = findUserByEmail(userEmail).id;
     res.redirect("/urls")
 
   }
-
 });
 
 
+// ## Account Management ##
 
-// Receives a login request and username
+// User login
 app.post("/login", (req, res) => {
   console.log(`Login request received from ${req.body.username}.`);
 
-  // if (!findUserByEmail(req.body.email) || findUserByEmail(req.body.email).password !== req.body.password) {
   if (!authenticateUser(req.body.email, req.body.password)) {
     res.status(403);
     res.send("Your email and password don't match, Bub.");
   } else {
-
     req.session.user_id = findUserByEmail(req.body.email).id;
     res.redirect("/");
   }
-
 });
 
-// Receives a logout request
+// User logout
 app.post("/logout", (req, res) => {
   console.log(`Logout request received.  Destroying cookie!`);
   req.session.user_id = null;
   res.redirect("/urls");
 });
 
-// Deletes a record if it was authored by the current user.
-app.post("/urls/:id/delete", (req, res) => {
 
-  //  Check to see if the shortURL's owner is the current user.
-  if (urlDB[req.params.id].ownerID !== req.session.user_id) {
-    res.status(401);
-    res.send(`'T'isn't thine to smite.`);
-  } else {
-
-    console.log("Deleted the record for " + urlDB[req.params.id]);
-    delete urlDB[req.params.id];
-    res.redirect("/urls");
-
-  }
-
-})
-
-// Updates Lilliput pointers
-app.post("/urls/:id", (req, res) => {
-
-  console.log("Got a request for Lilliput " + req.params.id + " to update from\n" + urlDB[req.params.id].longURL + " to " + req.body.longURL);
-  urlDB[req.params.id].longURL = req.body.longURL;
-  console.log(`DONE: www.lilli.put/${req.params.id} now points to ${urlDB[req.params.id].longURL}\n`);
-  res.redirect("/urls");
-
-})
-
-app.get("/urls/:id", (req, res) => {
-  if (urlDB[req.params.id].ownerID !== req.session.user_id) {
-    res.status(401);
-    res.send(`This isn't your URL.`);
-
-  } else {
-    let templateVars = {
-      "shortURL": urlDB[req.params.id].shortURL,
-      "longURL": urlDB[req.params.id].longURL,
-      "username": req.session.user_id,
-      // "urlDB": urlDB[req.params.id],
-      "users": usersDB
-    };
-
-    res.render("urls_show", templateVars);
-  };
-});
-
-
-
+// ## Listener: ##
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`)
+  console.log(`Lilliputifier is listening on port ${PORT}!`)
 });
-
