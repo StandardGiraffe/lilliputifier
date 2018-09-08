@@ -1,11 +1,16 @@
 # Lilliputifier:
 ###### Tying down the largest addresses since [1726](https://en.wikipedia.org/wiki/Lilliput_and_Blefuscu)
 Created by Danny Fekete
-[Lighthouse Labs:](https://www.lighthouselabs.ca/) Project #2
+[Lighthouse Labs:](https://www.lighthouselabs.ca/) Project #2 ("TinyApp")
+
 
 
 ## General:
 My first full-stack web application: using [Express](https://expressjs.com/) as a framework and absolutely no CSS styling or other beautificaiton, this app is a clone of link-management services like [bitly.com](https://bitly.com/) and [goo.gl](https://goo.gl/).
+
+## Screen Shots
+![Populated index page](docs/populated-homepage.png)
+![Modify an existing link](docs/modify-lilliput.png)
 
 ## Features:
 - User registration
@@ -21,5 +26,24 @@ My first full-stack web application: using [Express](https://expressjs.com/) as 
 ## Limitations:
 - User and URL databases are simulated within `express-server.js` and are destroyed at shutdown.
 - My god, it's ugly.
+
+## Dependencies
+- Node.js
+- Express
+- EJS
+- bcrypt
+- body-parser
+- cookie-session
+
+## Getting Started
+- Install all dependencies
+```
+$ npm install
+```
+- Run the development web server
+```
+$ node express_server.js
+```
+
 
 ###### Last updated 2018-09-08
