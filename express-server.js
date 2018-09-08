@@ -76,7 +76,6 @@ const createNewUser = function (email, password) {
 
   // Hash password:
   hashedPassword = bcrypt.hashSync(password, saltRounds);
-  console.log(`Password ${password} has been hashed to ${hashedPassword}`)
 
   const newRecord = {
     "id": id,
@@ -87,7 +86,7 @@ const createNewUser = function (email, password) {
   // Adds the new accout object to the database so that the key name matches the random ID
   usersDB[id] = newRecord;
   return newRecord;
-}
+};
 
 const createNewURL = function (shortURL, longURL, ownerID) {
   const newRecord = {
@@ -97,7 +96,7 @@ const createNewURL = function (shortURL, longURL, ownerID) {
   };
 
   urlDB[shortURL] = newRecord;
-}
+};
 
 // Alphanumeric random ID generator.  Adapted from https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
 const generateRandomString = function (length) {
@@ -118,7 +117,7 @@ const findUserByEmail = function (email) {
     }
   }
   return null;
-}
+};
 
 const findUserByID = function (id) {
   for (let record in usersDB) {
@@ -128,7 +127,7 @@ const findUserByID = function (id) {
     }
   }
   return null;
-}
+};
 
 // Return a database of URL records belonging to the provided user_id
 const findURLsByUser = function (user_id) {
@@ -140,7 +139,7 @@ const findURLsByUser = function (user_id) {
     }
   }
   return userURLDB;
-}
+};
 
 const authenticateUser = (email, password) => {
   const user = findUserByEmail(email);
@@ -150,7 +149,7 @@ const authenticateUser = (email, password) => {
   } else {
     return null;
   }
-}
+};
 
 
 // ########
@@ -202,14 +201,14 @@ app.get("/urls", (req, res) => {
 
   if (!findUserByID(req.session.user_id)) {
     res.redirect("/login");
-  } else {
 
+  } else {
     let templateVars = {
       urlDB: findURLsByUser(req.session.user_id),
       username: req.session.user_id,
       users: usersDB
-    }
-    console.log("Current DB contains: " + findURLsByUser(req.session.user_id));
+    };
+
     res.render("urls_index", templateVars);
   }
 });
@@ -219,14 +218,14 @@ app.get("/urls/new", (req, res) => {
 
   if (!findUserByID(req.session.user_id)) {
     res.redirect("/login");
-  } else {
 
+  } else {
     let templateVars = {
       username: req.session.user_id,
       users: usersDB
-    }
-    res.render("urls_new", templateVars);
+    };
 
+    res.render("urls_new", templateVars);
   }
 });
 
@@ -242,7 +241,7 @@ app.get("/urls/:id", (req, res) => {
       "longURL": urlDB[req.params.id].longURL,
       "username": req.session.user_id,
       "users": usersDB
-    }
+    };
 
     res.render("urls_show", templateVars);
   }
@@ -253,7 +252,6 @@ app.get("/urls/:id", (req, res) => {
 
 // Creates a new shortened URL
 app.post("/urls", (req, res) => {
-  console.log(req.body); // debug statement to see POST parameters
   let newShortURL = generateRandomString(8);
   createNewURL(newShortURL, req.body.longURL, req.session.user_id);
 
@@ -264,7 +262,7 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   urlDB[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
-})
+});
 
 // Deletes a shortened URL if it was authored by the current user.
 app.post("/urls/:id/delete", (req, res) => {
@@ -272,6 +270,7 @@ app.post("/urls/:id/delete", (req, res) => {
   if (urlDB[req.params.id].ownerID !== req.session.user_id) {
     res.status(401);
     res.send(`'T'isn't thine to smite.`);
+
   } else {
     delete urlDB[req.params.id];
     res.redirect("/urls");
@@ -291,7 +290,6 @@ app.post("/register", (req, res) => {
     res.status(400);  // supplied email matches another email in the database
 
   } else {
-
     userEmail = req.body.email;
     userPassword = req.body.password;
 
@@ -313,6 +311,7 @@ app.post("/login", (req, res) => {
   if (!authenticateUser(req.body.email, req.body.password)) {
     res.status(403);
     res.send("Your email and password don't match, Bub.");
+
   } else {
     req.session.user_id = findUserByEmail(req.body.email).id;
     res.redirect("/");
