@@ -2,7 +2,7 @@
 <p>Tying down the largest addresses since <a href="https://en.wikipedia.org/wiki/Lilliput_and_Blefuscu">1726</a>.</p>
 <br>
 <% if (username) { %>
-    <p>Welcome back, <%=username%>!</p>
+    <p>Welcome back, <%=users[username].email%>!</p>
     <form method="post" action="/logout">
       <button type="submit">Logout</button>
     </form>
