@@ -20,7 +20,7 @@
       <h2>Lilliputesyoudid:</h2>
       <ul>
         <% for (record in urlDB) { %>
-          <li>www.lilli.put/<strong><%= urlDB[record].shortURL %></strong> 👉 <%= urlDB[record].longURL %> <br> <a href="/urls/<%= urlDB[record].shortURL %>">Lillipointsomewhereelse?</a> <form method="POST" action="/urls/<%= urlDB[record].shortURL %>/delete"><button type="submit">Delete</button></form><br></li>
+          <li><a href="/u/<%= urlDB[record].shortURL %>">www.lilli.put/<strong><%= urlDB[record].shortURL %></strong></a> 👉 <a href="<%= urlDB[record].longURL %>"><%= urlDB[record].longURL %></a> <br> <a href="/urls/<%= urlDB[record].shortURL %>">Lillipointsomewhereelse?</a> <form method="POST" action="/urls/<%= urlDB[record].shortURL %>/delete"><button type="submit">Delete</button></form><br></li>
         <% }; %>
       </ul>
     </div>

@@ -200,7 +200,10 @@ app.get("/urls/new", (req, res) => {
     res.redirect("/login");
   } else {
 
-    let templateVars = { username: req.session.user_id };
+    let templateVars = {
+      username: req.session.user_id,
+      users: usersDB
+    }
     res.render("urls_new", templateVars);
 
   }
